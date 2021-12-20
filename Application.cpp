@@ -16,29 +16,26 @@ Application::Application(int width, int height) : m_Window(width, height), m_Cam
 
 void Application::RunLoop()
 {
-	BlockDB::s_Instance = BlockDB::SetupDatabase("res/texture/block.png", 64);
+	BlockDB& BlockDatabase = BlockDB::SetupDatabase("res/textures/blocks.png", 64);
 
-	float vertices[] = {
-		// Front face
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f, 0.25f, 0.0f,
-		1.0f, 1.0f, 0.0f, 0.25f, 0.333f,
-		0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 0.25f, 0.333f, 
-		0.0f, 1.0f, 0.0f, 0.0f, 0.333f,
+	int BlockTable[] = { 2 };
 
+	std::vector<float> vertices;
 
-		//Right Face
-		1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, -1.0f, 0.25f, 0.0f,
-		1.0f, 1.0f, -1.0f, 0.25f, 0.333f,
-		1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, -1.0f, 0.25f, 0.333f,
-		1.0f, 1.0f, 0.0f, 0.0f, 0.333f,
+	BlockData& Block = BlockDatabase.GetBlockData(BlockTable[0]);
+	std::vector<float>& FrontVertices = Block.FrontVertexAttribs;
+	std::vector<float>& RightVertices = Block.RightVertexAttribs;
+	std::vector<float>& LeftVertices = Block.LeftVertexAttribs;
+	std::vector<float>& BackVertices = Block.BackVertexAttribs;
+	std::vector<float>& TopVertices = Block.TopVertexAttribs;
+	std::vector<float>& BottomVertices = Block.BottomVertexAttribs;
 
-	};
-
-	
+	vertices.insert(vertices.begin(), FrontVertices.begin(), FrontVertices.end());
+	vertices.insert(vertices.end(), RightVertices.begin(), RightVertices.end());
+	vertices.insert(vertices.end(), LeftVertices.begin(), LeftVertices.end());
+	vertices.insert(vertices.end(), BackVertices.begin(), BackVertices.end());
+	vertices.insert(vertices.end(), TopVertices.begin(), TopVertices.end());
+	vertices.insert(vertices.end(), BottomVertices.begin(), BottomVertices.end());
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -48,22 +45,17 @@ void Application::RunLoop()
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
-	TextureAtlas Atlas("res/textures/blocks.png", 64);
-	Atlas.Bind();
+	BlockDatabase.Atlas.Bind();
 
-	Print(std::cout, Atlas.GetSubtexture(0, 1));
-
-
-	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClearColor(0.1f, 0.5f, 0.9f, 1.0f);
 
 	unsigned int FrameCount = 0;
 	unsigned int TotalElapsedTime = 0;
@@ -79,7 +71,7 @@ void Application::RunLoop()
 		ProcessKeyInput(DeltaTime);
 		
 
-		RenderInfo info = { VAO, 36 };
+		RenderInfo info = { VAO, vertices.size() };
 		std::vector<RenderInfo> ToDraw;
 		ToDraw.push_back(info);
 		m_Renderer.Draw(ToDraw, m_Camera);

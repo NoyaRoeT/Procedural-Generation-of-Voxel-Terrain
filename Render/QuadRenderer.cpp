@@ -23,6 +23,6 @@ void QuadRenderer::DrawQuads(const Shader& shader, const Camera& camera)
 		unsigned int VAO = i->VAO;
 		unsigned int IndicesCount = i->IndicesCount;
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glDrawArrays(GL_TRIANGLES, 0, IndicesCount);
 	}
 }
