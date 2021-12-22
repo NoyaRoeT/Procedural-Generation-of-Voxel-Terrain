@@ -6,55 +6,28 @@
 #include "Texture/TextureAtlas.h"
 #include "Timer.h"
 #include "World/Block/BlockDB.h"
+#include "World/Chunk/Chunk.h"
+#include <cstdlib>
 
 std::ostream& Print(const std::ostream&, std::array<float, 4> Subtexture);
 
-Application::Application(int width, int height) : m_Window(width, height), m_Camera((float)width / height, 105.0f)
+Application::Application(int width, int height) : m_Window(width, height), m_Camera((float)width / height, 90.0f)
 {
-
+	BlockDB::SetupDatabase("res/textures/blocks.png", 64);
 }
 
 void Application::RunLoop()
 {
-	BlockDB& BlockDatabase = BlockDB::SetupDatabase("res/textures/blocks.png", 64);
+	BlockDB& BlockDatabase = BlockDB::GetDatabase();
+	BlockDatabase.m_Atlas.Bind();
 
-	int BlockTable[] = { 2 };
-
-	std::vector<float> vertices;
-
-	BlockData& Block = BlockDatabase.GetBlockData(BlockTable[0]);
-	std::vector<float>& FrontVertices = Block.FrontVertexAttribs;
-	std::vector<float>& RightVertices = Block.RightVertexAttribs;
-	std::vector<float>& LeftVertices = Block.LeftVertexAttribs;
-	std::vector<float>& BackVertices = Block.BackVertexAttribs;
-	std::vector<float>& TopVertices = Block.TopVertexAttribs;
-	std::vector<float>& BottomVertices = Block.BottomVertexAttribs;
-
-	vertices.insert(vertices.begin(), FrontVertices.begin(), FrontVertices.end());
-	vertices.insert(vertices.end(), RightVertices.begin(), RightVertices.end());
-	vertices.insert(vertices.end(), LeftVertices.begin(), LeftVertices.end());
-	vertices.insert(vertices.end(), BackVertices.begin(), BackVertices.end());
-	vertices.insert(vertices.end(), TopVertices.begin(), TopVertices.end());
-	vertices.insert(vertices.end(), BottomVertices.begin(), BottomVertices.end());
+	Chunk chunk;
+	RenderInfo info;
+	info.VAO = chunk.GenerateVertexArray();
+	info.IndicesCount = chunk.m_NumFaces * 6;
 
 	glEnable(GL_DEPTH_TEST);
-
-	unsigned int VBO, VAO;
-	glGenBuffers(1, &VBO);
-	glGenVertexArrays(1, &VAO);
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
-	BlockDatabase.Atlas.Bind();
-
+	glEnable(GL_CULL_FACE);
 	glClearColor(0.1f, 0.5f, 0.9f, 1.0f);
 
 	unsigned int FrameCount = 0;
@@ -63,6 +36,7 @@ void Application::RunLoop()
 
 	while (!glfwWindowShouldClose(m_Window.m_Context))
 	{
+
 		++FrameCount;
 		Timer PerFrameTimer;
 
@@ -71,7 +45,6 @@ void Application::RunLoop()
 		ProcessKeyInput(DeltaTime);
 		
 
-		RenderInfo info = { VAO, vertices.size() };
 		std::vector<RenderInfo> ToDraw;
 		ToDraw.push_back(info);
 		m_Renderer.Draw(ToDraw, m_Camera);
@@ -81,13 +54,14 @@ void Application::RunLoop()
 
 		float ElapsedTime = PerFrameTimer.GetElapsedTime();
 		DeltaTime = ElapsedTime; // in seconds
-		TotalElapsedTime += ElapsedTime * 0.001;
+		TotalElapsedTime += ElapsedTime * 1000;
 	}
-	std::cout << "Average duration between each frame for " << FrameCount << " frames: " << TotalElapsedTime / (float)FrameCount << "ms" << std::endl;
+	std::cout << "Average duration between each frame for " << FrameCount << " frames: " << (float)TotalElapsedTime / FrameCount << "ms" << std::endl;
 }
 
 void Application::ProcessMouseInput(float dt)
 {
+
 	static bool firstMouse = true;
 	static double lastX = 0.0f;
 	static double lastY = 0.0f;

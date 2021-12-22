@@ -10,10 +10,10 @@ public:
 	static BlockDB& GetDatabase();
 	static BlockDB& SetupDatabase(const char* filepath, int texture_size);
 
-	BlockData& GetBlockData(int idx);
+	const BlockData& GetBlockData(int idx) const;
 
-	std::vector<BlockData> Database;
-	TextureAtlas Atlas;
+	std::vector<BlockData> m_Database;
+	TextureAtlas m_Atlas;
 private:
 	BlockDB(const char* filepath, int texture_size);
 

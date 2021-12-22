@@ -1,11 +1,11 @@
 #include "BlockDB.h"
 
-BlockDB::BlockDB(const char* filepath, int texture_size) : Atlas(filepath, texture_size)
+BlockDB::BlockDB(const char* filepath, int texture_size) : m_Atlas(filepath, texture_size)
 {
 	for (int i = BlockID::GRASS; i != BlockID::COUNT; ++i)
 	{
-		BlockData block(static_cast<BlockID>(i), Atlas);
-		Database.push_back(block);
+		BlockData block(static_cast<BlockID>(i), m_Atlas);
+		m_Database.push_back(block);
 	}
 }
 
@@ -20,7 +20,7 @@ BlockDB& BlockDB::SetupDatabase(const char* filepath, int texture_size)
 	return s_Instance;
 }
 
-BlockData& BlockDB::GetBlockData(int idx)
+const BlockData& BlockDB::GetBlockData(int idx) const
 {
-	return Database[idx];
+	return m_Database[idx];
 }
