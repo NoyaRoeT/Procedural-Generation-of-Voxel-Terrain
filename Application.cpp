@@ -7,12 +7,14 @@
 #include "Timer.h"
 #include "World/Block/BlockDB.h"
 #include "World/Chunk/Chunk.h"
+#include "World/Chunk/ChunkManager.h"
 #include <cstdlib>
 
 std::ostream& Print(const std::ostream&, std::array<float, 4> Subtexture);
 
-Application::Application(int width, int height) : m_Window(width, height), m_Camera((float)width / height, 90.0f)
+Application::Application(int width, int height) : m_Window(width, height), m_Player((float)width/height)
 {
+	// To be extracted to world class or sth like that
 	BlockDB::SetupDatabase("res/textures/blocks.png", 64);
 }
 
@@ -21,42 +23,23 @@ void Application::RunLoop()
 	BlockDB& BlockDatabase = BlockDB::GetDatabase();
 	BlockDatabase.m_Atlas.Bind();
 
-	Chunk chunk;
-	RenderInfo info;
-	info.VAO = chunk.GenerateVertexArray();
-	info.IndicesCount = chunk.m_NumFaces * 6;
-
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glClearColor(0.1f, 0.5f, 0.9f, 1.0f);
-
-	unsigned int FrameCount = 0;
-	unsigned int TotalElapsedTime = 0;
-	float DeltaTime = 0.0f;
-
+	Timer PerFrameTimer;
 	while (!glfwWindowShouldClose(m_Window.m_Context))
 	{
+		PerFrameTimer.StartTime();
+		ProcessMouseInput(PerFrameTimer.m_DeltaTime);
+		ProcessKeyInput(PerFrameTimer.m_DeltaTime);
+		m_Player.ProcessMouseButton(m_ChunkManager, m_Window.m_Context);
+		m_ChunkManager.Update(m_Player.GetPosition());
 
-		++FrameCount;
-		Timer PerFrameTimer;
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ProcessMouseInput(DeltaTime);
-		ProcessKeyInput(DeltaTime);
-		
-
-		std::vector<RenderInfo> ToDraw;
-		ToDraw.push_back(info);
-		m_Renderer.Draw(ToDraw, m_Camera);
-
+		m_Renderer.Draw(m_ChunkManager.GetRenderInfoList(), m_Player.m_Camera);
 		glfwSwapBuffers(m_Window.m_Context);
 		glfwPollEvents();
 
-		float ElapsedTime = PerFrameTimer.GetElapsedTime();
-		DeltaTime = ElapsedTime; // in seconds
-		TotalElapsedTime += ElapsedTime * 1000;
+		PerFrameTimer.StopTime();
+	
 	}
-	std::cout << "Average duration between each frame for " << FrameCount << " frames: " << (float)TotalElapsedTime / FrameCount << "ms" << std::endl;
+	std::cout << "Average duration between each frame for " << PerFrameTimer.m_FrameCount << " frames: " << PerFrameTimer.GetMSPerFrame() << "ms" << std::endl;
 }
 
 void Application::ProcessMouseInput(float dt)
@@ -79,8 +62,7 @@ void Application::ProcessMouseInput(float dt)
 	
 	double xoffset = xpos - lastX;
 	double yoffset = ypos - lastY;
-
-	m_Camera.ProcessMouseInput(xoffset, yoffset, dt);
+	m_Player.ProcessMouseInput(xoffset, yoffset, dt);
 
 	lastX = xpos;
 	lastY = ypos;
@@ -90,8 +72,10 @@ void Application::ProcessKeyInput(float dt)
 {
 	GLFWwindow* Context = m_Window.m_Context;
 	if (glfwGetKey(Context, GLFW_KEY_ESCAPE) == GLFW_PRESS) glfwSetWindowShouldClose(Context, true);
+	if (glfwGetKey(Context, GLFW_KEY_1) == GLFW_PRESS) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (glfwGetKey(Context, GLFW_KEY_2) == GLFW_PRESS) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	m_Camera.ProcessKeyboardInput(Context, dt);
+	m_Player.ProcessKeyboardInput(Context, dt);
 }
 
 // Function for debugging

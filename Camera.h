@@ -20,13 +20,16 @@ public:
 	float m_Yaw = -90.0f;
 	float m_Pitch = 0.0f;
 	float m_Sensitivity = 20.0f;
-	float m_Speed = 5.0f;
+	float m_Speed = 10.0f;
+
+	glm::mat4 m_Projection;
 
 	Camera(float aspectRatio, float fov = 90.0f, const glm::vec3& pos = glm::vec3(0.0f),
 		const glm::vec3& worldup = glm::vec3(0.0f, 1.0f, 0.0f));
 
 	glm::mat4 GetViewMatrix() const;
-	glm::mat4 GetPerspectiveMatrix() const;
+	const glm::mat4& GetPerspectiveMatrix() const;
+	glm::mat4 GetProjectionViewMatrix() const;
 	void ProcessMouseInput(float xoffset, float yoffset, float dt);
 	void ProcessKeyboardInput(GLFWwindow* context, float dt);
 

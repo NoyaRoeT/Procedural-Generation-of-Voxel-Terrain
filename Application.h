@@ -1,7 +1,8 @@
 #pragma once
 #include "Window.h"
 #include "Render/Renderer.h"
-#include "Camera.h"
+#include "Player.h"
+#include "World/Chunk/ChunkManager.h"
 
 class Application
 {
@@ -14,8 +15,8 @@ public:
 
 private:
 	Window m_Window;
-	Camera m_Camera;
-	//Runtime m_Runtime;
+	Player m_Player;
+	ChunkManager m_ChunkManager;
 	Renderer m_Renderer;
 	
 };

@@ -1,21 +1,15 @@
-1. Winding Direction:
-- By default front-facing triangles in OpenGl are CCW Winded.
+1. When a vector grows, it is moved to a new location
+- This move destroys the original object, hence the destructor is called. This resulted in the pointer of ChunkData being copied,
+but the data itself on the heap being deleted which lead to a subscript error.
+- Used shared_ptrs instead.
 
-2. Handedness in OpenGL
-- OpenGl uses Right-handed coordinate systems, but is left-handed in NDC due to projection matrix reversing handedness.
-
-3. Make sure to initialise GLAD before using any OpenGL Functions
-- Might accidentally call an OpenGL function before initialising GLAD when creating abstractions with classes/functions.
-This would lead to accessing uninitialised memory/nullptr.
-
-4. Reading an entire textfile into a string using ifstream and stringstream
-- We first open the files using ifstream. To allow exceptions to be thrown in case this fails, we use ifstream::exceptions and a try-catch block.
-- We then use rdbuf and << into the stringstream. stringstream::str() to then copy the contents into a string object.
 
 ToDo List:
-1. Texture Atlas Class: BlockID/BlockCoords Input -> 4 Texture Coordinates as output (Problaby using some struct)
-2. Chunk Class: Generate Chunktable which represents the chunk, generating chunk mesh data, destroying chunks
-3. Chunk Renderer: Since mesh data is generated in Chunk class, need only render that data.
+- Only load chunks when crossing chunk border;
+- Make a chunk loading queue so that chunk loading doesn't freeze the game every time.
 
 Optional:
 - Improve First Person Camera
+
+Bugs:
+- Block breaking doesn't work in negative x chunk coords.

@@ -3,13 +3,13 @@
 #include <vector>
 class TextureAtlas;
 
-enum BlockID {
-	GRASS, DIRT, STONE, COUNT
+enum BlockType {
+	AIR, GRASS, DIRT, WOOD, STONE, COUNT
 };
 
 struct BlockData
 {
-	BlockData(BlockID block, const TextureAtlas& atlas);
+	BlockData(BlockType block, const TextureAtlas& atlas);
 
 	std::vector<float> TopVertexAttribs;
 	std::vector<float> RightVertexAttribs;
@@ -17,13 +17,7 @@ struct BlockData
 	std::vector<float> FrontVertexAttribs;
 	std::vector<float> BackVertexAttribs;
 	std::vector<float> BottomVertexAttribs;
+	bool isOpaque;
 
-	// Store subtexture coordinates for ea face in the order xmin ymin xmax ymax
-	std::array<float, 4> TopTexCoords; 
-	std::array<float, 4> SideTexCoords;
-	std::array<float, 4> BottomTexCoords;
-
-private:
-	void GenerateVertexAttribVectors();
 };
 

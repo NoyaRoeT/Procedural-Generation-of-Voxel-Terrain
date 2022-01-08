@@ -3,7 +3,8 @@
 #include <iostream>
 
 Camera::Camera(float aspectRatio, float fov, const glm::vec3& pos, const glm::vec3& worldup) :
-	m_AspectRatio(aspectRatio), m_Position(pos), m_WorldUp(worldup), m_FOV(fov)
+	m_AspectRatio(aspectRatio), m_Position(pos), m_WorldUp(worldup), m_FOV(fov),
+	m_Projection(glm::perspective(fov, aspectRatio, 0.01f, 1000.0f))
 {
 	UpdateCameraVectors();
 }
@@ -13,9 +14,14 @@ glm::mat4 Camera::GetViewMatrix() const
 	return glm::lookAt(m_Position, m_Position + m_Front, m_WorldUp);
 }
 
-glm::mat4 Camera::GetPerspectiveMatrix() const
+const glm::mat4& Camera::GetPerspectiveMatrix() const
 {
-	return glm::perspective(glm::radians(m_FOV), m_AspectRatio, 0.1f, 1000.0f);
+	return m_Projection;
+}
+
+glm::mat4 Camera::GetProjectionViewMatrix() const
+{
+	return m_Projection * GetViewMatrix();
 }
 
 void Camera::ProcessMouseInput(float xoffset, float yoffset, float dt)
@@ -29,14 +35,15 @@ void Camera::ProcessMouseInput(float xoffset, float yoffset, float dt)
 	if (m_Pitch > 89.0f) m_Pitch = 89.0f;
 	else if (m_Pitch < -89.0f) m_Pitch = -89.0f;
 
-
 	UpdateCameraVectors();
 }
 
 void Camera::ProcessKeyboardInput(GLFWwindow* context, float dt)
 {
 	float speed = m_Speed * dt;
-	if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS)  m_Position += m_Front * speed;
+	if (glfwGetKey(context, GLFW_KEY_W) == GLFW_PRESS)  m_Position
+		
+		+= m_Front * speed;
 	if (glfwGetKey(context, GLFW_KEY_S) == GLFW_PRESS)  m_Position -= m_Front * speed;
 	if (glfwGetKey(context, GLFW_KEY_A) == GLFW_PRESS)  m_Position -= m_Right * speed;
 	if (glfwGetKey(context, GLFW_KEY_D) == GLFW_PRESS)  m_Position += m_Right * speed;

@@ -9,12 +9,12 @@ public:
 
 	static BlockDB& GetDatabase();
 	static BlockDB& SetupDatabase(const char* filepath, int texture_size);
-
-	const BlockData& GetBlockData(int idx) const;
+	static const BlockData* GetBlock(int idx);
 
 	std::vector<BlockData> m_Database;
 	TextureAtlas m_Atlas;
 private:
 	BlockDB(const char* filepath, int texture_size);
+	const BlockData* GetBlockData(int idx) const;
 
 };
