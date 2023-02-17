@@ -1,4 +1,4 @@
-# Procedural Generation of Voxel Terrain
+# Procedural Generation of Voxel Terrain Demo
 This is my first attempt at a minecraft-like world with procedural generation using 2D noise functions.
 
 I was recommened this video by Youtube: [Coding Minecraft in One Week - C++/OpenGL Programming Challenge](https://www.youtube.com/watch?v=Xq3isov6mZ8&t=169s)
